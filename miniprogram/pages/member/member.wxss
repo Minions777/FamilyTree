@@ -1,0 +1,6 @@
+@import "../../../app.wxss";
+
+textarea.input {
+  min-height: 160rpx;
+  width: 100%;
+}

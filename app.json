@@ -1,0 +1,14 @@
+{
+  "pages": [
+    "miniprogram/pages/index/index",
+    "miniprogram/pages/member/member"
+  ],
+  "window": {
+    "navigationBarTitleText": "家族族谱",
+    "navigationBarBackgroundColor": "#ffffff",
+    "navigationBarTextStyle": "black",
+    "backgroundTextStyle": "light"
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}

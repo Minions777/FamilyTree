@@ -1,0 +1,33 @@
+<view class="container">
+  <view class="card">
+    <view class="section-title">{{isEdit ? '编辑成员' : '新增成员'}}</view>
+
+    <view class="field-label">姓名</view>
+    <input class="input" placeholder="请输入姓名" value="{{form.name}}" data-field="name" bindinput="onInput" />
+
+    <view class="field-label">性别</view>
+    <radio-group bindchange="onGenderChange">
+      <label style="margin-right: 24rpx;"><radio value="男" checked="{{form.gender==='男'}}" />男</label>
+      <label><radio value="女" checked="{{form.gender==='女'}}" />女</label>
+    </radio-group>
+
+    <view class="field-label">出生年份</view>
+    <input class="input" type="number" placeholder="如 1990" value="{{form.birthYear}}" data-field="birthYear" bindinput="onInput" />
+
+    <view class="field-label">代际</view>
+    <input class="input" type="number" placeholder="如 3" value="{{form.generation}}" data-field="generation" bindinput="onInput" />
+
+    <view class="field-label">父节点</view>
+    <picker mode="selector" range="{{parentOptions}}" range-key="label" value="{{parentIndex}}" bindchange="onParentChange">
+      <view class="input">{{parentOptions[parentIndex].label}}</view>
+    </picker>
+
+    <view class="field-label">备注</view>
+    <textarea class="input" placeholder="成员说明" value="{{form.note}}" data-field="note" bindinput="onInput" />
+
+    <view class="btn-row" style="margin-top: 24rpx;">
+      <button class="btn-primary" loading="{{saving}}" bindtap="onSubmit">保存</button>
+      <button wx:if="{{isEdit}}" class="btn-danger" bindtap="onDelete">删除</button>
+    </view>
+  </view>
+</view>
