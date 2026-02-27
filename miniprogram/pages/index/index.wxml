@@ -1,0 +1,24 @@
+<view class="container">
+  <view class="card">
+    <view class="section-title">族谱树</view>
+    <block wx:for="{{treeLines}}" wx:key="index">
+      <view class="tree-line">{{item}}</view>
+    </block>
+  </view>
+
+  <view class="card">
+    <view class="section-title">成员列表</view>
+    <button class="btn-primary" bindtap="goAdd">新增成员</button>
+
+    <view wx:if="{{members.length === 0}}" style="margin-top: 20rpx; color: #6b7280;">暂无成员</view>
+
+    <block wx:for="{{members}}" wx:key="_id">
+      <view style="margin-top: 20rpx; padding-top: 12rpx; border-top: 1rpx solid #f1f5f9;">
+        <view>{{item.name}}（第{{item.generation || '-'}}代）</view>
+        <view style="color:#6b7280; margin-top: 6rpx;">性别：{{item.gender || '未知'}} ｜ 出生：{{item.birthYear || '-'}}</view>
+        <view style="color:#6b7280; margin-top: 6rpx;">备注：{{item.note || '无'}}</view>
+        <button size="mini" style="margin-top: 10rpx;" data-id="{{item._id}}" bindtap="goEdit">编辑</button>
+      </view>
+    </block>
+  </view>
+</view>

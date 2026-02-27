@@ -1,0 +1,20 @@
+{
+  "description": "家族族谱小程序",
+  "packOptions": {
+    "ignore": []
+  },
+  "setting": {
+    "urlCheck": false,
+    "es6": true,
+    "enhance": true,
+    "postcss": true,
+    "minified": false,
+    "newFeature": true,
+    "coverView": true,
+    "nodeModules": false
+  },
+  "compileType": "miniprogram",
+  "appid": "touristappid",
+  "projectname": "family-tree",
+  "miniprogramRoot": "./"
+}
