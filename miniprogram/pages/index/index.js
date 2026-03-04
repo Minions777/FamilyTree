@@ -1,4 +1,4 @@
-const { buildTreeLines } = require('../../utils/family');
+const { buildTreeLines, computeFamilyStats, buildRelationGraph } = require('../../utils/family');
 
 const db = wx.cloud.database();
 const memberCollection = db.collection('family_members');
@@ -13,7 +13,15 @@ Page({
     generationIndex: 0,
     searchKeyword: '',
     treeLines: [],
-    filteredMembers: []
+    filteredMembers: [],
+    familyStats: {
+      totalPopulation: 0,
+      maleCount: 0,
+      femaleCount: 0,
+      unknownGenderCount: 0,
+      generationDistribution: []
+    },
+    relationGraphRows: []
   },
 
   onShow() {
@@ -31,7 +39,8 @@ Page({
       this.setData({
         members,
         events,
-        generationOptions: this.buildGenerationOptions(members)
+        generationOptions: this.buildGenerationOptions(members),
+        familyStats: computeFamilyStats(members)
       });
       this.applyFilters();
     } catch (error) {
@@ -105,9 +114,20 @@ Page({
         };
       });
 
+    const relationGraphRows = buildRelationGraph(filteredMembers).map((item) => ({
+      ...item,
+      grandParentText: item.grandParentNames.length > 0 ? item.grandParentNames.join('、') : '无',
+      grandChildrenText: item.grandChildrenNames.length > 0 ? item.grandChildrenNames.join('、') : '无',
+      cousinText:
+        item.cousinNames.length > 0
+          ? item.cousinNames.map((cousin) => `${cousin.name}（${cousin.type}）`).join('、')
+          : '无'
+    }));
+
     this.setData({
       filteredMembers,
-      treeLines: buildTreeLines(filteredMembers)
+      treeLines: buildTreeLines(filteredMembers),
+      relationGraphRows
     });
   },
 
