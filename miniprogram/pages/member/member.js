@@ -8,13 +8,21 @@ Page({
     isEdit: false,
     saving: false,
     parentIndex: 0,
+    spouseIndex: 0,
+    siblingIndices: [],
     parentOptions: [{ label: '无（祖先节点）', value: '' }],
+    spouseOptions: [{ label: '无', value: '' }],
+    siblingOptions: [],
+    allMembers: [],
     form: {
       name: '',
       gender: '男',
       birthYear: '',
       parentId: '',
+      spouseId: '',
+      siblingIds: [],
       generation: '',
+      avatarFileID: '',
       note: ''
     }
   },
@@ -22,32 +30,50 @@ Page({
   async onLoad(options) {
     const id = options?.id || '';
     this.setData({ id, isEdit: !!id });
-    await this.loadParentOptions();
+    await this.loadMemberOptions();
     if (id) {
       await this.loadDetail(id);
     }
   },
 
-  async loadParentOptions() {
+  async loadMemberOptions() {
     const { data } = await collection.orderBy('generation', 'asc').get();
-    const options = [{ label: '无（祖先节点）', value: '' }].concat(
-      data.map((item) => ({ label: `${item.name}（第${item.generation || '-'}代）`, value: item._id }))
-    );
-    this.setData({ parentOptions: options });
+    const filteredMembers = this.data.id ? data.filter((item) => item._id !== this.data.id) : data;
+
+    this.setData({
+      allMembers: data,
+      parentOptions: [{ label: '无（祖先节点）', value: '' }].concat(
+        filteredMembers.map((item) => ({ label: `${item.name}（第${item.generation || '-'}代）`, value: item._id }))
+      ),
+      spouseOptions: [{ label: '无', value: '' }].concat(
+        filteredMembers.map((item) => ({ label: `${item.name}（第${item.generation || '-'}代）`, value: item._id }))
+      ),
+      siblingOptions: filteredMembers.map((item) => ({ label: `${item.name}（第${item.generation || '-'}代）`, value: item._id }))
+    });
   },
 
   async loadDetail(id) {
     try {
       const { data } = await collection.doc(id).get();
       const parentIndex = this.data.parentOptions.findIndex((item) => item.value === (data.parentId || ''));
+      const spouseIndex = this.data.spouseOptions.findIndex((item) => item.value === (data.spouseId || ''));
+      const siblingIndices = (data.siblingIds || [])
+        .map((siblingId) => this.data.siblingOptions.findIndex((item) => item.value === siblingId))
+        .filter((index) => index >= 0);
+
       this.setData({
         parentIndex: parentIndex >= 0 ? parentIndex : 0,
+        spouseIndex: spouseIndex >= 0 ? spouseIndex : 0,
+        siblingIndices,
         form: {
           name: data.name || '',
           gender: data.gender || '男',
           birthYear: data.birthYear ? String(data.birthYear) : '',
           parentId: data.parentId || '',
+          spouseId: data.spouseId || '',
+          siblingIds: data.siblingIds || [],
           generation: data.generation ? String(data.generation) : '',
+          avatarFileID: data.avatarFileID || '',
           note: data.note || ''
         }
       });
@@ -76,6 +102,47 @@ Page({
     });
   },
 
+  onSpouseChange(e) {
+    const spouseIndex = Number(e.detail.value);
+    const spouseId = this.data.spouseOptions[spouseIndex]?.value || '';
+    this.setData({
+      spouseIndex,
+      'form.spouseId': spouseId
+    });
+  },
+
+  onSiblingChange(e) {
+    const siblingIndices = e.detail.value.map((value) => Number(value));
+    const siblingIds = siblingIndices.map((index) => this.data.siblingOptions[index]?.value).filter(Boolean);
+    this.setData({
+      siblingIndices,
+      'form.siblingIds': siblingIds
+    });
+  },
+
+  async chooseAvatar() {
+    try {
+      const { tempFilePaths } = await wx.chooseMedia({
+        count: 1,
+        mediaType: ['image'],
+        sourceType: ['album', 'camera']
+      });
+
+      if (!tempFilePaths || tempFilePaths.length === 0) return;
+      const filePath = tempFilePaths[0];
+      const cloudPath = `avatars/${Date.now()}-${Math.floor(Math.random() * 10000)}.png`;
+
+      wx.showLoading({ title: '上传中' });
+      const { fileID } = await wx.cloud.uploadFile({ cloudPath, filePath });
+      this.setData({ 'form.avatarFileID': fileID });
+      wx.hideLoading();
+      wx.showToast({ title: '上传成功' });
+    } catch (error) {
+      wx.hideLoading();
+      wx.showToast({ title: '上传失败', icon: 'none' });
+    }
+  },
+
   async onSubmit() {
     const payload = this.normalizeForm();
     if (!payload.name) {
@@ -85,6 +152,7 @@ Page({
 
     this.setData({ saving: true });
     try {
+      let memberId = this.data.id;
       if (this.data.isEdit) {
         await collection.doc(this.data.id).update({
           data: {
@@ -93,14 +161,17 @@ Page({
           }
         });
       } else {
-        await collection.add({
+        const res = await collection.add({
           data: {
             ...payload,
             createdAt: _.date(),
             updatedAt: _.date()
           }
         });
+        memberId = res._id;
       }
+
+      await this.syncRelations(memberId, payload);
 
       wx.showToast({ title: '保存成功' });
       setTimeout(() => {
@@ -112,6 +183,30 @@ Page({
     } finally {
       this.setData({ saving: false });
     }
+  },
+
+  async syncRelations(memberId, payload) {
+    const tasks = [];
+    if (payload.spouseId) {
+      tasks.push(
+        collection.doc(payload.spouseId).update({
+          data: { spouseId: memberId, updatedAt: _.date() }
+        })
+      );
+    }
+
+    payload.siblingIds.forEach((siblingId) => {
+      tasks.push(
+        collection.doc(siblingId).update({
+          data: {
+            siblingIds: _.addToSet(memberId),
+            updatedAt: _.date()
+          }
+        })
+      );
+    });
+
+    await Promise.all(tasks);
   },
 
   async onDelete() {
@@ -146,7 +241,10 @@ Page({
       gender: form.gender || '未知',
       birthYear: form.birthYear ? Number(form.birthYear) : null,
       parentId: form.parentId || '',
+      spouseId: form.spouseId || '',
+      siblingIds: form.siblingIds || [],
       generation: form.generation ? Number(form.generation) : null,
+      avatarFileID: form.avatarFileID || '',
       note: form.note.trim()
     };
   }

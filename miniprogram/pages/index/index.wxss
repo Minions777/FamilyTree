@@ -1,1 +1,25 @@
 @import "../../../app.wxss";
+
+.list-item {
+  margin-top: 20rpx;
+  padding-top: 12rpx;
+  border-top: 1rpx solid #f1f5f9;
+}
+
+.muted {
+  margin-top: 8rpx;
+  color: #6b7280;
+}
+
+.member-top {
+  display: flex;
+  gap: 16rpx;
+  align-items: center;
+}
+
+.avatar {
+  width: 88rpx;
+  height: 88rpx;
+  border-radius: 50%;
+  background: #e5e7eb;
+}
