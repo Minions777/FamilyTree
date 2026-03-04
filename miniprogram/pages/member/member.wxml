@@ -2,6 +2,12 @@
   <view class="card">
     <view class="section-title">{{isEdit ? '编辑成员' : '新增成员'}}</view>
 
+    <view class="field-label">头像</view>
+    <view class="avatar-row">
+      <image wx:if="{{form.avatarFileID}}" class="avatar" src="{{form.avatarFileID}}" mode="aspectFill" />
+      <button size="mini" bindtap="chooseAvatar">上传头像</button>
+    </view>
+
     <view class="field-label">姓名</view>
     <input class="input" placeholder="请输入姓名" value="{{form.name}}" data-field="name" bindinput="onInput" />
 
@@ -21,6 +27,18 @@
     <picker mode="selector" range="{{parentOptions}}" range-key="label" value="{{parentIndex}}" bindchange="onParentChange">
       <view class="input">{{parentOptions[parentIndex].label}}</view>
     </picker>
+
+    <view class="field-label">配偶</view>
+    <picker mode="selector" range="{{spouseOptions}}" range-key="label" value="{{spouseIndex}}" bindchange="onSpouseChange">
+      <view class="input">{{spouseOptions[spouseIndex].label}}</view>
+    </picker>
+
+    <view class="field-label">兄弟姐妹（可多选）</view>
+    <checkbox-group bindchange="onSiblingChange">
+      <label class="checkbox-item" wx:for="{{siblingOptions}}" wx:key="value">
+        <checkbox value="{{index}}" checked="{{siblingIndices.includes(index)}}" />{{item.label}}
+      </label>
+    </checkbox-group>
 
     <view class="field-label">备注</view>
     <textarea class="input" placeholder="成员说明" value="{{form.note}}" data-field="note" bindinput="onInput" />

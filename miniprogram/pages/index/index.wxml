@@ -1,5 +1,14 @@
 <view class="container">
   <view class="card">
+    <view class="section-title">筛选与搜索</view>
+    <input class="input" placeholder="按姓名/备注搜索" value="{{searchKeyword}}" bindinput="onSearchInput" />
+    <view class="field-label">代际</view>
+    <picker mode="selector" range="{{generationOptions}}" range-key="label" value="{{generationIndex}}" bindchange="onGenerationChange">
+      <view class="input">{{generationOptions[generationIndex].label}}</view>
+    </picker>
+  </view>
+
+  <view class="card">
     <view class="section-title">族谱树</view>
     <block wx:for="{{treeLines}}" wx:key="index">
       <view class="tree-line">{{item}}</view>
@@ -7,16 +16,37 @@
   </view>
 
   <view class="card">
+    <view class="section-title">家族事件时间线</view>
+    <button class="btn-primary" bindtap="goEventAdd">新增事件</button>
+
+    <view wx:if="{{events.length === 0}}" class="muted">暂无事件</view>
+    <block wx:for="{{events}}" wx:key="_id">
+      <view class="list-item">
+        <view>{{item.eventDate}} · {{item.title}}</view>
+        <view class="muted">{{item.description || '无描述'}}</view>
+        <button size="mini" data-id="{{item._id}}" bindtap="goEventEdit">编辑</button>
+      </view>
+    </block>
+  </view>
+
+  <view class="card">
     <view class="section-title">成员列表</view>
     <button class="btn-primary" bindtap="goAdd">新增成员</button>
 
-    <view wx:if="{{members.length === 0}}" style="margin-top: 20rpx; color: #6b7280;">暂无成员</view>
+    <view wx:if="{{filteredMembers.length === 0}}" class="muted">暂无成员</view>
 
-    <block wx:for="{{members}}" wx:key="_id">
-      <view style="margin-top: 20rpx; padding-top: 12rpx; border-top: 1rpx solid #f1f5f9;">
-        <view>{{item.name}}（第{{item.generation || '-'}}代）</view>
-        <view style="color:#6b7280; margin-top: 6rpx;">性别：{{item.gender || '未知'}} ｜ 出生：{{item.birthYear || '-'}}</view>
-        <view style="color:#6b7280; margin-top: 6rpx;">备注：{{item.note || '无'}}</view>
+    <block wx:for="{{filteredMembers}}" wx:key="_id">
+      <view class="list-item">
+        <view class="member-top">
+          <image wx:if="{{item.avatarFileID}}" class="avatar" src="{{item.avatarFileID}}" mode="aspectFill" />
+          <view>
+            <view>{{item.name}}（第{{item.generation || '-'}}代）</view>
+            <view class="muted">性别：{{item.gender || '未知'}} ｜ 出生：{{item.birthYear || '-'}}</view>
+          </view>
+        </view>
+        <view class="muted">配偶：{{item.spouseName}}</view>
+        <view class="muted">兄弟姐妹：{{item.siblingNames}}</view>
+        <view class="muted">备注：{{item.note || '无'}}</view>
         <button size="mini" style="margin-top: 10rpx;" data-id="{{item._id}}" bindtap="goEdit">编辑</button>
       </view>
     </block>

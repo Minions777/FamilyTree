@@ -1,7 +1,8 @@
 {
   "pages": [
     "miniprogram/pages/index/index",
-    "miniprogram/pages/member/member"
+    "miniprogram/pages/member/member",
+    "miniprogram/pages/event/event"
   ],
   "window": {
     "navigationBarTitleText": "家族族谱",

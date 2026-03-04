@@ -1,0 +1,19 @@
+<view class="container">
+  <view class="card">
+    <view class="section-title">{{isEdit ? '编辑事件' : '新增事件'}}</view>
+
+    <view class="field-label">事件标题</view>
+    <input class="input" placeholder="如：家族聚会" value="{{form.title}}" data-field="title" bindinput="onInput" />
+
+    <view class="field-label">事件日期</view>
+    <input class="input" placeholder="如：2026-03-04" value="{{form.eventDate}}" data-field="eventDate" bindinput="onInput" />
+
+    <view class="field-label">事件描述</view>
+    <textarea class="input" placeholder="补充事件详情" value="{{form.description}}" data-field="description" bindinput="onInput" />
+
+    <view class="btn-row" style="margin-top: 24rpx;">
+      <button class="btn-primary" loading="{{saving}}" bindtap="onSubmit">保存</button>
+      <button wx:if="{{isEdit}}" class="btn-danger" bindtap="onDelete">删除</button>
+    </view>
+  </view>
+</view>
