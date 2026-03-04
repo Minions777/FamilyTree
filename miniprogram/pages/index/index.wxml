@@ -9,9 +9,53 @@
   </view>
 
   <view class="card">
+    <view class="section-title">家族统计看板</view>
+    <view class="stats-grid">
+      <view class="stat-item">
+        <view class="stat-value">{{familyStats.totalPopulation}}</view>
+        <view class="muted">总人口</view>
+      </view>
+      <view class="stat-item">
+        <view class="stat-value">{{familyStats.maleCount}}</view>
+        <view class="muted">男性</view>
+      </view>
+      <view class="stat-item">
+        <view class="stat-value">{{familyStats.femaleCount}}</view>
+        <view class="muted">女性</view>
+      </view>
+      <view class="stat-item">
+        <view class="stat-value">{{familyStats.unknownGenderCount}}</view>
+        <view class="muted">性别未填</view>
+      </view>
+    </view>
+
+    <view class="field-label">代际分布</view>
+    <view wx:if="{{familyStats.generationDistribution.length === 0}}" class="muted">暂无代际数据</view>
+    <block wx:for="{{familyStats.generationDistribution}}" wx:key="label">
+      <view class="distribution-row">
+        <view>{{item.label}}</view>
+        <view>{{item.value}} 人</view>
+      </view>
+    </block>
+  </view>
+
+  <view class="card">
     <view class="section-title">族谱树</view>
     <block wx:for="{{treeLines}}" wx:key="index">
       <view class="tree-line">{{item}}</view>
+    </block>
+  </view>
+
+  <view class="card">
+    <view class="section-title">精细关系图（祖孙 / 堂表亲）</view>
+    <view wx:if="{{relationGraphRows.length === 0}}" class="muted">暂无可展示关系</view>
+    <block wx:for="{{relationGraphRows}}" wx:key="memberId">
+      <view class="list-item">
+        <view>{{item.memberName}}</view>
+        <view class="muted">祖辈：{{item.grandParentText}}</view>
+        <view class="muted">孙辈：{{item.grandChildrenText}}</view>
+        <view class="muted">堂/表亲：{{item.cousinText}}</view>
+      </view>
     </block>
   </view>
 
